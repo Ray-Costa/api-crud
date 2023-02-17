@@ -1,16 +1,11 @@
 import { QueryResult } from 'pg';
+import { createUserSchemas,returnUserSchemas,returnUserSchemasWithoutPassword } from '../schemas/users.schemas';
+import {z} from'zod'
 
-export interface IUserRequest {
-  name:string,
-  email:string,
-  password:string,
-  admin:boolean,
-  active:boolean
-}
 
-export interface IUser extends IUserRequest {
-  id:number
-}
+export type IUserRequest = z.infer<typeof createUserSchemas>
+
+export type IUser = z.infer<typeof returnUserSchemas>
 
 export type IUserWithOutPassword = Omit<IUser, 'password'>
 

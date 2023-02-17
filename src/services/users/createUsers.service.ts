@@ -3,19 +3,19 @@ import { client } from '../../database';
 import format from 'pg-format';
 import { QueryConfig, QueryResult } from 'pg';
 import { AppError } from '../../errors';
-import { createUserSchemas } from '../../schemas/users.schemas';
+import { createUserSchemas, returnUserSchemasWithoutPassword } from '../../schemas/users.schemas';
 
 
 export const createUsersService = async (userData:IUserRequest):Promise<IUserWithOutPassword> => {
 
-  const validateUserData = createUserSchemas.parse(userData)
+
 
   const stringUserExists: string = `
       SELECT * FROM users WHERE email = $1;
   `
   const queryConfigUserExists: QueryConfig = {
     text:stringUserExists,
-    values: [validateUserData.email]
+    values: [userData.email]
   }
   const queryResultUserExists: QueryResult = await client.query(queryConfigUserExists)
 
@@ -25,14 +25,17 @@ export const createUsersService = async (userData:IUserRequest):Promise<IUserWit
 
   const queryString:string = format(
     `
-            INSERT INTO users(%I) VALUES (%L) RETURNING id, name, email,admin,active;
+            INSERT INTO users(%I) VALUES (%L) RETURNING *;
     
     `,
-    Object.keys(validateUserData),
-    Object.values(validateUserData)
+    Object.keys(userData),
+    Object.values(userData)
   )
 
   const queryResult:IUserResult = await client.query(queryString)
-  return queryResult.rows[0]
+
+  const newUsers = returnUserSchemasWithoutPassword.parse(queryResult.rows[0])
+
+  return newUsers
 
 }
