@@ -1,7 +1,9 @@
-import { Request, Response } from 'express';
+import { request, Request, Response } from 'express';
 import { createUsersService } from '../services/users/createUsers.service';
-import { IUserRequest } from '../interfaces/users.interfaces';
-import { listUserService } from '../services/users/listUser.service';
+import { IUser, IUserRequest } from '../interfaces/users.interfaces';
+import { deleteUserService,} from '../services/users/deleteUser.service';
+import { listAllUserService } from '../services/users/listAllUser.service';
+import { updateUserService } from '../services/users/updateUser.service';
 
 export const createUsersController = async (request: Request, response: Response): Promise<Response> => {
 
@@ -14,13 +16,29 @@ export const createUsersController = async (request: Request, response: Response
 
 
 }
-export const listUserController = async (request: Request, response: Response): Promise<Response> => {
+export const deleteUserController = async (request: Request, response: Response): Promise<Response> => {
 
 
   const idUser: number = parseInt(request.params.id)
 
-  const getUser = await listUserService(idUser)
+  await deleteUserService(idUser)
 
-  return response.json(getUser)
+  return response.status(204).send()
 
+}
+export const listAllUserController = async (request:Request, response:Response): Promise<Response> => {
+
+  const getAllUser = await listAllUserService()
+
+  return response.json(getAllUser)
+}
+
+export const updateUserController = async (request:Request, response:Response): Promise<Response> => {
+
+  const idUser: number = parseInt(request.params.id)
+  const newUser: IUser = request.body
+
+  const updateUser = await updateUserService(idUser, newUser);
+
+  return  response.status(200).json(updateUser)
 }
